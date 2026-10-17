@@ -1,0 +1,196 @@
+# yaml-language-server: $schema=https://www.jbanalytica.com/model2data/spec/0.4.0/model.schema.json
+model2data: 0.4.0
+name: healthcare_clinics
+description: "A small network of outpatient clinics: who books, who shows up, who gets seen by whom, and what it earns."
+
+enums:
+  clinic_site:
+    - Northside Clinic
+    - Riverside Clinic
+    - Harbour Clinic
+    - Old Town Clinic
+    - Westpark Clinic
+    - Eastgate Clinic
+    - Hillcrest Clinic
+    - Central Clinic
+  treatment_name:
+    - Initial consultation
+    - Follow-up consultation
+    - Annual check-up
+    - Physiotherapy session
+    - Psychotherapy session
+    - Skin check
+    - ECG
+    - Blood panel
+    - Ultrasound
+    - Vaccination
+    - Wound care
+    - Allergy test
+  specialty: [general_practice, physiotherapy, dermatology, cardiology, pediatrics, psychology]
+  appointment_status: [completed, cancelled, no_show]
+  appointment_channel: [in_person, video, phone]
+  booking_source: [online, phone, referral, walk_in]
+
+tables:
+  clinics:
+    role: dimension
+    columns:
+      id: {type: bigint, pk: true, not_null: true}
+      name: {type: clinic_site, unique: true, not_null: true}
+      opened_on: {type: date, not_null: true}
+
+  practitioners:
+    role: dimension
+    columns:
+      id: {type: bigint, pk: true, not_null: true}
+      clinic_id: {type: bigint, not_null: true, references: clinics.id}
+      first_name: {type: first_name, not_null: true}
+      last_name: {type: last_name, not_null: true}
+      specialty:
+        type: specialty
+        not_null: true
+        generate:
+          weights:
+            general_practice: 5
+            physiotherapy: 4
+            psychology: 3
+            dermatology: 2
+            pediatrics: 2
+            cardiology: 1
+      started_on: {type: date, not_null: true}
+      is_active:
+        type: boolean
+        not_null: true
+        generate: {true_rate: 0.9}
+
+  treatments:
+    role: dimension
+    columns:
+      id: {type: bigint, pk: true, not_null: true}
+      name: {type: treatment_name, unique: true, not_null: true}
+
+  insurers:
+    role: dimension
+    columns:
+      id: {type: bigint, pk: true, not_null: true}
+      name:
+        type: company
+        unique: true
+        not_null: true
+        description: Health insurer the patient is covered by
+
+  patients:
+    role: dimension
+    columns:
+      id: {type: bigint, pk: true, not_null: true}
+      home_clinic_id:
+        type: bigint
+        not_null: true
+        references: clinics.id
+        generate: {skew: 0.5}
+      insurer_id:
+        type: bigint
+        references: insurers.id
+        generate: {null_rate: 0.2, skew: 0.6}
+      first_name: {type: first_name, not_null: true}
+      last_name: {type: last_name, not_null: true}
+      date_of_birth: {type: date, not_null: true}
+      email:
+        type: email
+        generate: {null_rate: 0.15}
+      postcode: {type: postcode, not_null: true}
+      registered_at:
+        type: timestamp
+        not_null: true
+        generate: {growth: 0.6}
+
+  appointments:
+    role: fact
+    columns:
+      id: {type: bigint, pk: true, not_null: true}
+      patient_id:
+        type: bigint
+        not_null: true
+        references: patients.id
+        measure: count_distinct
+        generate: {skew: 0.6}
+      practitioner_id:
+        type: bigint
+        not_null: true
+        references: practitioners.id
+        generate: {skew: 0.4}
+      treatment_id:
+        type: bigint
+        not_null: true
+        references: treatments.id
+        generate: {skew: 0.7}
+      booking_source:
+        type: booking_source
+        not_null: true
+        generate:
+          weights: {online: 6, phone: 3, referral: 2, walk_in: 1}
+      channel:
+        type: appointment_channel
+        not_null: true
+        generate:
+          weights: {in_person: 7, video: 2, phone: 1}
+      status:
+        type: appointment_status
+        not_null: true
+        generate:
+          weights: {completed: 16, cancelled: 3, no_show: 1}
+      booked_at:
+        type: timestamp
+        not_null: true
+        generate: {growth: 0.5}
+      scheduled_for:
+        type: timestamp
+        not_null: true
+        generate: {after: booked_at, business_hours: true}
+      checked_in_at:
+        type: timestamp
+        generate:
+          after: scheduled_for
+          when: {status: [completed]}
+      cancelled_at:
+        type: timestamp
+        generate:
+          after: booked_at
+          when: {status: [cancelled]}
+      actual_duration_minutes:
+        type: int
+        generate:
+          min: 10
+          max: 120
+          when: {status: [completed]}
+          distribution: {kind: normal, mean: 35, stddev: 12}
+      billed_amount:
+        type: numeric
+        generate:
+          min: 25
+          max: 600
+          when: {status: [completed]}
+          distribution: {kind: lognormal, median: 95, spread: 0.5}
+      paid_at:
+        type: timestamp
+        generate:
+          after: checked_in_at
+          when: {status: [completed]}
+          null_rate: 0.3
+
+groups:
+  reference: {tables: [clinics, practitioners, treatments, insurers]}
+  activity: {tables: [patients, appointments]}
+
+run:
+  rows: 100
+  rows_per_table:
+    clinics: 8
+    practitioners: 40
+    treatments: 12
+    insurers: 6
+    patients: 1500
+    appointments: 6000
+  seed: 42
+  as_of: 2026-10-01
+  shape: {business_hours: true}

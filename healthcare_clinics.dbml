@@ -1,0 +1,145 @@
+// Healthcare clinic network: clinics, practitioners, a treatment list, insurers, patients
+// and appointments. Fully synthetic, no patient data anywhere near it.
+// model2data 1.12.0, spec 0.4.0 (uses `when`).
+//
+// Billing lives on the appointment, not in a separate invoices table: a child table cannot
+// see its parent's status or date, so invoices would land on cancelled visits and before
+// the visit happened. On the appointment, `when` keeps every bill on a completed visit.
+// Payment status is not stored: derive it in dbt from paid_at and the visit's age
+// (paid, open, overdue), so it can never contradict the timestamp.
+//
+//   model2data --file healthcare_clinics.dbml --seed 42 --as-of 2026-10-01 --rows 100 \
+//     --rows-for clinics=8 --rows-for practitioners=40 --rows-for treatments=12 \
+//     --rows-for insurers=6 --rows-for patients=1500 --rows-for appointments=6000 \
+//     --business-hours --unit-tests
+
+Project healthcare_clinics {
+  Note: 'A small network of outpatient clinics: who books, who shows up, who gets seen by whom, and what it earns.'
+}
+
+Enum clinic_site {
+  "Northside Clinic"
+  "Riverside Clinic"
+  "Harbour Clinic"
+  "Old Town Clinic"
+  "Westpark Clinic"
+  "Eastgate Clinic"
+  "Hillcrest Clinic"
+  "Central Clinic"
+}
+
+Enum treatment_name {
+  "Initial consultation"
+  "Follow-up consultation"
+  "Annual check-up"
+  "Physiotherapy session"
+  "Psychotherapy session"
+  "Skin check"
+  "ECG"
+  "Blood panel"
+  "Ultrasound"
+  "Vaccination"
+  "Wound care"
+  "Allergy test"
+}
+
+Enum specialty {
+  general_practice
+  physiotherapy
+  dermatology
+  cardiology
+  pediatrics
+  psychology
+}
+
+Enum appointment_status {
+  completed
+  cancelled
+  no_show
+}
+
+Enum appointment_channel {
+  in_person
+  video
+  phone
+}
+
+Enum booking_source {
+  online
+  phone
+  referral
+  walk_in
+}
+
+Table clinics {
+  id bigint [pk, not null]
+  name clinic_site [not null, unique]
+  opened_on date [not null]
+  Note: '{"role": "dimension"}'
+}
+
+Table practitioners {
+  id bigint [pk, not null]
+  clinic_id bigint [not null, ref: > clinics.id]
+  first_name first_name [not null]
+  last_name last_name [not null]
+  specialty specialty [not null, note: '{"weights": {"general_practice": 5, "physiotherapy": 4, "psychology": 3, "dermatology": 2, "pediatrics": 2, "cardiology": 1}}']
+  started_on date [not null]
+  is_active boolean [not null, note: '{"true_rate": 0.9}']
+  Note: '{"role": "dimension"}'
+}
+
+Table treatments {
+  id bigint [pk, not null]
+  name treatment_name [not null, unique]
+  Note: '{"role": "dimension"}'
+}
+
+Table insurers {
+  id bigint [pk, not null]
+  name company [not null, unique, note: 'Health insurer the patient is covered by']
+  Note: '{"role": "dimension"}'
+}
+
+Table patients {
+  id bigint [pk, not null]
+  home_clinic_id bigint [not null, ref: > clinics.id, note: '{"skew": 0.5}']
+  insurer_id bigint [ref: > insurers.id, note: '{"null_rate": 0.2, "skew": 0.6}']
+  first_name first_name [not null]
+  last_name last_name [not null]
+  date_of_birth date [not null]
+  email email [note: '{"null_rate": 0.15}']
+  postcode postcode [not null]
+  registered_at timestamp [not null, note: '{"growth": 0.6}']
+  Note: '{"role": "dimension"}'
+}
+
+Table appointments {
+  id bigint [pk, not null]
+  patient_id bigint [not null, ref: > patients.id, note: '{"skew": 0.6, "measure": "count_distinct"}']
+  practitioner_id bigint [not null, ref: > practitioners.id, note: '{"skew": 0.4}']
+  treatment_id bigint [not null, ref: > treatments.id, note: '{"skew": 0.7}']
+  booking_source booking_source [not null, note: '{"weights": {"online": 6, "phone": 3, "referral": 2, "walk_in": 1}}']
+  channel appointment_channel [not null, note: '{"weights": {"in_person": 7, "video": 2, "phone": 1}}']
+  status appointment_status [not null, note: '{"weights": {"completed": 16, "cancelled": 3, "no_show": 1}}']
+  booked_at timestamp [not null, note: '{"growth": 0.5}']
+  scheduled_for timestamp [not null, note: '{"after": "booked_at", "business_hours": true}']
+  checked_in_at timestamp [note: '{"after": "scheduled_for", "when": {"status": ["completed"]}}']
+  cancelled_at timestamp [note: '{"after": "booked_at", "when": {"status": ["cancelled"]}}']
+  actual_duration_minutes int [note: '{"min": 10, "max": 120, "distribution": "normal", "mean": 35, "stddev": 12, "when": {"status": ["completed"]}}']
+  billed_amount numeric [note: '{"min": 25, "max": 600, "distribution": "lognormal", "median": 95, "spread": 0.5, "when": {"status": ["completed"]}}']
+  paid_at timestamp [note: '{"after": "checked_in_at", "when": {"status": ["completed"]}, "null_rate": 0.3}']
+  Note: '{"role": "fact"}'
+}
+
+TableGroup reference {
+  clinics
+  practitioners
+  treatments
+  insurers
+}
+
+TableGroup activity {
+  patients
+  appointments
+}

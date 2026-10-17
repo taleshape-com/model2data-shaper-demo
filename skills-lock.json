@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "shaper-dashboard-development": {
+      "source": "taleshape-com/shaper-skills",
+      "sourceType": "github",
+      "skillPath": "shaper-dashboard-development/SKILL.md",
+      "computedHash": "b82aa97590346abb8db2ec2cea3c6aac82c29a5628ab55793fecb17bd380eed2"
+    },
+    "shaper-setup": {
+      "source": "taleshape-com/shaper-skills",
+      "sourceType": "github",
+      "skillPath": "shaper-setup/SKILL.md",
+      "computedHash": "3cd8f9e88ec217c30be4d6c5c606365b97f0da67eb75b435c00dff78241f1c9b"
+    }
+  }
+}

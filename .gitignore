@@ -1,0 +1,4 @@
+.shaperdata
+.shaper-auth
+*.duckdb.wal
+
