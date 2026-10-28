@@ -524,6 +524,7 @@ SELECT 'Download PDF Summary'::DOWNLOAD_PDF, 'd7b1b36b-74b8-4c9f-863a-23efbe9ff5
 - **`LABEL`**: Injects headers for cards or filters. Place right before the target card/filter query.
   - **Card/Widget Subtitles**: Can be paired with `::SUBTITLE` to display explanatory text below the card label (e.g., `SELECT 'My Label'::LABEL, 'Explanation for chart'::SUBTITLE;`).
 - **`SUBTITLE`**: Adds extra explanation as text below a section title or a card label. Selected in the same query alongside a `::SECTION` or `::LABEL`.
+- **`CLASS`**: Adds one or more custom CSS classes (comma-separated) to a section or a card. Can be selected in the same query alongside a `::SECTION` or `::LABEL`, or specified standalone as `SELECT 'my-class'::CLASS;` preceding a card or section.
 - **`PLACEHOLDER`**: Injects blank spaces in the grid layout to align cards vertically.
 - **`HEADER_IMAGE`**: Sets dashboard logo (URL or base64 URL) displayed on screens and every page of PDFs.
 - **`FOOTER_LINK`**: Displays a footer link on screens and PDFs (URLs or mailto). You can set the text displayed for a footer link using a column alias (e.g. `SELECT 'https://example.com/moreinfo'::FOOTER_LINK AS "Click for more information";`).
@@ -535,23 +536,27 @@ SELECT 'Download PDF Summary'::DOWNLOAD_PDF, 'd7b1b36b-74b8-4c9f-863a-23efbe9ff5
 SELECT 'Revenue Metrics'::SECTION, 'Overview of financial performance'::SUBTITLE
 WHERE (SELECT sum(revenue) FROM daily_sales) > 0;
 
--- 2. Section Header with Subtitle
-SELECT 'My Section'::SECTION, 'This is my section'::SUBTITLE;
+-- 2. Section Header with Subtitle and Custom Classes
+SELECT 'My Section'::SECTION, 'This is my section'::SUBTITLE, 'highlight-section'::CLASS;
 
--- 3. Labeling a Single Value Card or Chart with Subtitle
-SELECT 'My Label'::LABEL, 'Explanation for chart'::SUBTITLE;
+-- 3. Labeling a Single Value Card or Chart with Subtitle and Custom Classes
+SELECT 'My Label'::LABEL, 'Explanation for chart'::SUBTITLE, 'featured-card'::CLASS;
 SELECT 50000 AS "Target";
 
--- 4. Injecting a Grid Placeholder to align cards
+-- 4. Custom Classes on a Card without Label
+SELECT 'highlight-card'::CLASS;
+SELECT 25000 AS "Secondary Metric";
+
+-- 5. Injecting a Grid Placeholder to align cards
 SELECT 200 AS "This Week";
 SELECT ''::PLACEHOLDER;
 SELECT 150 AS "Last Week";
 
--- 5. Logo Header & Footer Link
+-- 6. Logo Header & Footer Link
 SELECT 'https://example.com/logo.png'::HEADER_IMAGE;
 SELECT 'https://example.com/moreinfo'::FOOTER_LINK AS "Click for more information";
 
--- 6. Auto Reload
+-- 7. Auto Reload
 SELECT (INTERVAL '5 minutes')::RELOAD;
 ```
 
