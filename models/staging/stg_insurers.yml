@@ -1,0 +1,13 @@
+version: 2
+models:
+- name: stg_insurers
+  columns:
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: name
+    description: Health insurer the patient is covered by
+    tests:
+    - not_null
+    - unique

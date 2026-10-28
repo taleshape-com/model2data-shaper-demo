@@ -1,0 +1,16 @@
+unit_tests:
+- name: test_stg_insurers_passthrough
+  model: stg_insurers
+  given:
+  - input: ref('insurers')
+    rows:
+    - id: 14
+      name: Mcdaniel, Chambers and Williams
+    - id: 93
+      name: Roth, Cunningham and Fox
+  expect:
+    rows:
+    - id: 14
+      name: Mcdaniel, Chambers and Williams
+    - id: 93
+      name: Roth, Cunningham and Fox

@@ -1,0 +1,33 @@
+name: 'healthcare_clinics'
+version: '1.0'
+config-version: 2
+
+profile: 'healthcare_clinics_profile'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["data-tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  healthcare_clinics:
+    staging:
+      +schema: staging
+      +materialized: view
+    # model2data generates staging models only. Uncomment when you add your
+    # own models under models/marts/ -- dbt warns about configuration paths
+    # that match no resources, so leaving this active would print an
+    # "unused configuration paths" warning on every run.
+    # marts:
+    #   +schema: marts
+    #   +materialized: table
+
+seeds:
+  +schema: raw

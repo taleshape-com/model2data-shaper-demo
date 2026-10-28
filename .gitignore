@@ -2,3 +2,8 @@
 .shaper-auth
 *.duckdb.wal
 
+target/
+dbt_packages/
+logs/
+*.duckdb.wal
+.user.yml

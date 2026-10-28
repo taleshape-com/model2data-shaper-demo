@@ -1,0 +1,36 @@
+unit_tests:
+- name: test_stg_practitioners_passthrough
+  model: stg_practitioners
+  given:
+  - input: ref('practitioners')
+    rows:
+    - id: 7
+      clinic_id: 19
+      first_name: Bruce
+      last_name: Donovan
+      specialty: general_practice
+      started_on: '2026-08-01'
+      is_active: true
+    - id: 25
+      clinic_id: 77
+      first_name: Samantha
+      last_name: Jackson
+      specialty: physiotherapy
+      started_on: '2025-01-05'
+      is_active: true
+  expect:
+    rows:
+    - id: 7
+      clinic_id: 19
+      first_name: Bruce
+      last_name: Donovan
+      specialty: general_practice
+      started_on: '2026-08-01'
+      is_active: true
+    - id: 25
+      clinic_id: 77
+      first_name: Samantha
+      last_name: Jackson
+      specialty: physiotherapy
+      started_on: '2025-01-05'
+      is_active: true

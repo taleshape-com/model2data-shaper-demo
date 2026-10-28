@@ -1,0 +1,48 @@
+version: 2
+models:
+- name: stg_patients
+  columns:
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: home_clinic_id
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_clinics')
+          field: id
+  - name: insurer_id
+    tests:
+    - relationships:
+        arguments:
+          to: ref('stg_insurers')
+          field: id
+    - model2data_max_null_share:
+        arguments:
+          max_share: 0.3
+        config:
+          severity: warn
+  - name: first_name
+    tests:
+    - not_null
+  - name: last_name
+    tests:
+    - not_null
+  - name: date_of_birth
+    tests:
+    - not_null
+  - name: email
+    tests:
+    - model2data_max_null_share:
+        arguments:
+          max_share: 0.25
+        config:
+          severity: warn
+  - name: postcode
+    tests:
+    - not_null
+  - name: registered_at
+    tests:
+    - not_null

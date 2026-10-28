@@ -1,0 +1,16 @@
+unit_tests:
+- name: test_stg_treatments_passthrough
+  model: stg_treatments
+  given:
+  - input: ref('treatments')
+    rows:
+    - id: 26
+      name: Wound care
+    - id: 46
+      name: Vaccination
+  expect:
+    rows:
+    - id: 26
+      name: Wound care
+    - id: 46
+      name: Vaccination

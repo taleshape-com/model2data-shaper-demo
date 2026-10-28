@@ -1,0 +1,44 @@
+unit_tests:
+- name: test_stg_patients_passthrough
+  model: stg_patients
+  given:
+  - input: ref('patients')
+    rows:
+    - id: 1348
+      home_clinic_id: 33
+      insurer_id: 93
+      first_name: Dominique
+      last_name: Meyer
+      date_of_birth: '2026-06-30'
+      email: dominique.meyer@hotmail.com
+      postcode: '02706'
+      registered_at: '2025-12-12 16:23:17'
+    - id: 878
+      home_clinic_id: 76
+      insurer_id: 93
+      first_name: Troy
+      last_name: Arnold
+      date_of_birth: '2025-10-22'
+      email: troy.arnold@hotmail.com
+      postcode: '23088'
+      registered_at: '2026-07-09 09:04:08'
+  expect:
+    rows:
+    - id: 1348
+      home_clinic_id: 33
+      insurer_id: 93
+      first_name: Dominique
+      last_name: Meyer
+      date_of_birth: '2026-06-30'
+      email: dominique.meyer@hotmail.com
+      postcode: '02706'
+      registered_at: '2025-12-12 16:23:17'
+    - id: 878
+      home_clinic_id: 76
+      insurer_id: 93
+      first_name: Troy
+      last_name: Arnold
+      date_of_birth: '2025-10-22'
+      email: troy.arnold@hotmail.com
+      postcode: '23088'
+      registered_at: '2026-07-09 09:04:08'

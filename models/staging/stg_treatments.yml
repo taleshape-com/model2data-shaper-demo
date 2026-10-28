@@ -1,0 +1,27 @@
+version: 2
+models:
+- name: stg_treatments
+  columns:
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: name
+    tests:
+    - not_null
+    - unique
+    - accepted_values:
+        arguments:
+          values:
+          - Initial consultation
+          - Follow-up consultation
+          - Annual check-up
+          - Physiotherapy session
+          - Psychotherapy session
+          - Skin check
+          - ECG
+          - Blood panel
+          - Ultrasound
+          - Vaccination
+          - Wound care
+          - Allergy test

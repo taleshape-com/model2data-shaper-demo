@@ -1,0 +1,8 @@
+healthcare_clinics_profile:
+  target: dev
+  outputs:
+    dev:
+
+      type: duckdb
+      threads: 1
+      path: "healthcare_clinics_profile.duckdb"

@@ -1,0 +1,26 @@
+version: 2
+models:
+- name: stg_clinics
+  columns:
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: name
+    tests:
+    - not_null
+    - unique
+    - accepted_values:
+        arguments:
+          values:
+          - Northside Clinic
+          - Riverside Clinic
+          - Harbour Clinic
+          - Old Town Clinic
+          - Westpark Clinic
+          - Eastgate Clinic
+          - Hillcrest Clinic
+          - Central Clinic
+  - name: opened_on
+    tests:
+    - not_null

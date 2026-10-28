@@ -1,0 +1,39 @@
+version: 2
+models:
+- name: stg_practitioners
+  columns:
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: clinic_id
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_clinics')
+          field: id
+  - name: first_name
+    tests:
+    - not_null
+  - name: last_name
+    tests:
+    - not_null
+  - name: specialty
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - general_practice
+          - physiotherapy
+          - dermatology
+          - cardiology
+          - pediatrics
+          - psychology
+  - name: started_on
+    tests:
+    - not_null
+  - name: is_active
+    tests:
+    - not_null

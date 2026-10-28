@@ -1,0 +1,37 @@
+version: 2
+seeds:
+- name: clinics
+  description: Table clinics
+  config:
+    column_types:
+      name: varchar
+- name: practitioners
+  description: Table practitioners
+  config:
+    column_types:
+      first_name: varchar
+      last_name: varchar
+      specialty: varchar
+- name: treatments
+  description: Table treatments
+  config:
+    column_types:
+      name: varchar
+- name: insurers
+  description: Table insurers
+  config:
+    column_types:
+      name: varchar
+- name: patients
+  description: Table patients
+  config:
+    column_types:
+      first_name: varchar
+      last_name: varchar
+      email: varchar
+      postcode: varchar
+- name: appointments
+  description: Table appointments
+  config:
+    column_types:
+      booking_source: varchar

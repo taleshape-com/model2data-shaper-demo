@@ -1,0 +1,149 @@
+version: 2
+models:
+- name: stg_appointments
+  columns:
+  - name: id
+    tests:
+    - not_null
+    - unique
+  - name: patient_id
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_patients')
+          field: id
+  - name: practitioner_id
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_practitioners')
+          field: id
+  - name: treatment_id
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('stg_treatments')
+          field: id
+  - name: booking_source
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - online
+          - phone
+          - referral
+          - walk_in
+  - name: channel
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - in_person
+          - video
+          - phone
+  - name: status
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - completed
+          - cancelled
+          - no_show
+  - name: booked_at
+    tests:
+    - not_null
+  - name: scheduled_for
+    tests:
+    - not_null
+    - model2data_not_before:
+        arguments:
+          other: booked_at
+        config:
+          severity: warn
+  - name: checked_in_at
+    tests:
+    - model2data_not_before:
+        arguments:
+          other: scheduled_for
+        config:
+          severity: warn
+    - model2data_when:
+        arguments:
+          conditions:
+            status:
+            - completed
+        config:
+          severity: warn
+  - name: cancelled_at
+    tests:
+    - model2data_not_before:
+        arguments:
+          other: booked_at
+        config:
+          severity: warn
+    - model2data_when:
+        arguments:
+          conditions:
+            status:
+            - cancelled
+        config:
+          severity: warn
+  - name: actual_duration_minutes
+    tests:
+    - model2data_between:
+        arguments:
+          min_value: 10
+          max_value: 120
+        config:
+          severity: warn
+    - model2data_when:
+        arguments:
+          conditions:
+            status:
+            - completed
+        config:
+          severity: warn
+  - name: billed_amount
+    tests:
+    - model2data_between:
+        arguments:
+          min_value: 25
+          max_value: 600
+        config:
+          severity: warn
+    - model2data_when:
+        arguments:
+          conditions:
+            status:
+            - completed
+        config:
+          severity: warn
+  - name: paid_at
+    tests:
+    - model2data_not_before:
+        arguments:
+          other: checked_in_at
+        config:
+          severity: warn
+    - model2data_when:
+        arguments:
+          conditions:
+            status:
+            - completed
+          required: false
+        config:
+          severity: warn
+    - model2data_when_max_null_share:
+        arguments:
+          conditions:
+            status:
+            - completed
+          max_share: 0.4
+        config:
+          severity: warn

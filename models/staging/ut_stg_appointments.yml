@@ -1,0 +1,64 @@
+unit_tests:
+- name: test_stg_appointments_passthrough
+  model: stg_appointments
+  given:
+  - input: ref('appointments')
+    rows:
+    - id: 1197
+      patient_id: 989
+      practitioner_id: 43
+      treatment_id: 22
+      booking_source: online
+      channel: in_person
+      status: no_show
+      booked_at: '2026-01-22 13:33:51'
+      scheduled_for: '2026-01-29 09:09:06'
+      checked_in_at: null
+      cancelled_at: null
+      actual_duration_minutes: null
+      billed_amount: null
+      paid_at: null
+    - id: 2655
+      patient_id: 343
+      practitioner_id: 58
+      treatment_id: 93
+      booking_source: phone
+      channel: phone
+      status: completed
+      booked_at: '2026-01-16 17:02:23'
+      scheduled_for: '2026-01-21 12:24:23'
+      checked_in_at: '2026-01-22 10:09:21'
+      cancelled_at: null
+      actual_duration_minutes: 26
+      billed_amount: 210.59
+      paid_at: '2026-01-23 16:53:32'
+  expect:
+    rows:
+    - id: 1197
+      patient_id: 989
+      practitioner_id: 43
+      treatment_id: 22
+      booking_source: online
+      channel: in_person
+      status: no_show
+      booked_at: '2026-01-22 13:33:51'
+      scheduled_for: '2026-01-29 09:09:06'
+      checked_in_at: null
+      cancelled_at: null
+      actual_duration_minutes: null
+      billed_amount: null
+      paid_at: null
+    - id: 2655
+      patient_id: 343
+      practitioner_id: 58
+      treatment_id: 93
+      booking_source: phone
+      channel: phone
+      status: completed
+      booked_at: '2026-01-16 17:02:23'
+      scheduled_for: '2026-01-21 12:24:23'
+      checked_in_at: '2026-01-22 10:09:21'
+      cancelled_at: null
+      actual_duration_minutes: 26
+      billed_amount: 210.59
+      paid_at: '2026-01-23 16:53:32'
